@@ -12,31 +12,31 @@
     <ol>
       <li>Where should you use constants, and where should you use variables? Can they all be constants?</li>
       <p>
-				[Replace this with you answer]
+				[You should use constants for values that do not change throughout the program, such as mathematical constants or configuration settings. Variables should be used for values that may change during the execution of the program, such as user input or counters.
 			</p>
       <li>How do parentheses affect the arithmetic outcome of an expression?</li>
       <p>
-				[Replace this with you answer]
+				[Parentheses affect the order of operations in an expression. They indicate which operations should be performed first, overriding the default precedence rules. For example, in the expression 3 + 5 * 2, multiplication is performed first, resulting in 13. However, if parentheses are used like this: (3 + 5) * 2, the addition is performed first, resulting in 16.]
 			</p>
       <li>How do we limit floating-point numbers to a given number of decimals?</li>
       <p>
-				[Replace this with you answer]
+				[We can limit floating-point numbers to a specific number of decimal places using methods like toFixed(). For example, num.toFixed(2) will format the number to two decimal places.
 			</p>
       <li>How can we compare two floating-point values to see if they are equal (is 12.199999 the same as 12.2)?</li>
       <p>
-				[Replace this with you answer]
+				[To compare two floating-point values for equality, we can check if the absolute difference between them is smaller than a very small threshold (epsilon). For example, we can use: Math.abs(a - b) < epsilon, where epsilon is a small value like 0.0001. This approach accounts for potential precision errors in floating-point arithmetic.]
 			</p>
       <li>What do comparison operators return, and how can we check if they are FALSE or TRUE?</li>
       <p>
-				[Replace this with you answer]
+				[Comparison operators return values like TRUE or FALSE. We can check their values directly in conditional statements like (a > b) { ... }) or by assigning the result to a variable (e.g., let isGreater = a > b;). We can then use these boolean values in logical operations or further comparisons.]
 			</p>
       <li>How does the Math.random() function work, and what can it be used for?</li>
       <p>
-				[Replace this with you answer]
+				[The Math.random() function generates a pseudo-random floating-point number between 0 (inclusive) and 1 (exclusive). It can be used for various purposes, such as simulating randomness in games, generating random IDs, or selecting random items from a list. To get a random number within a specific range, we can scale and shift the output of Math.random(). For example, to get a random integer between min and max, we can use: Math.floor(Math.random() * (max - min + 1)) + min.]
 			</p>
       <li>What is modulus (%), and when do we need this operator in mathematical operations?</li>
       <p>
-				[Replace this with you answer]
+				[The modulus operator (%) returns the remainder of a division operation between two numbers. It is useful in various scenarios, such as determining if a number is even or odd (e.g., num % 2 === 0 for even numbers), cycling through a fixed range of values (e.g., wrapping around array indices), or performing operations that require periodicity (e.g., clock arithmetic).]
 			</p>
     </ol>
 		<script type="module" src="./task_2-2.mjs" defer></script>
