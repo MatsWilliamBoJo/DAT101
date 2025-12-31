@@ -11,12 +11,13 @@
     </div>
     <ol>
       <li>Discuss the behavior of part 1, What happens when the wake-up time is not 7 and what happens when it is exactly 7?</li>
-      <p>[Replace this with you answer]</p>
+      <p>If wakeUpTime is exactly 7 the if-condition is true and the program prints "I can take the bus to school." If it is not 7 the first if is skipped; if it equals 8 the else‑if prints "I can take the train...", otherwise the final else prints "I have to take the car to school."</p>
       <li>Same as question #1. How ever the answer should now be different. Discuss the behavior of part 2, What happens when the wake-up time is not 7 and what happens when it is exactly 7?</li>
-      <p>[Replace this with you answer]</p>
+      <p>Behavior is the same logically: exact match to 7 triggers the bus branch. Note: if you change comparison to strict equality (===) the type must also match (e.g. the string "7" would not match). If not 7 the code falls through to the else-if / else branches.</p>
       <li>Discuss the behavior of part 3, what happens when wake time is less than 7 or greater than 8?</li>
-      <p>[Replace this with you answer]</p>
+      <p>If wakeUpTime &lt; 7 or &gt; 8 neither the 7 nor the 8 conditions match, so the else branch runs (the code prints that you have to take the car). Only exact matches to 7 or 8 use the bus or train messages.</p>
       <li>Discuss the behavior for part 4, what happens if the number is exactly 0, is zero positive or negative?</li>
+      <p>With the checks if (n &gt; 0) ... else if (n &lt; 0) ... else ..., a value of 0 reaches the final else. Zero is neither positive nor negative, so the code should treat it as the 'else' case.</p>
     </ol>
     <script type="module" src="./task_3-1.mjs" defer></script>
   </body>

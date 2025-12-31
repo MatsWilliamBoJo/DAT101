@@ -10,8 +10,18 @@
       <span id="txtOut" style="white-space: nowrap"></span>
     </div>
     <ol>
-      <li>[Write the question here, and copy this for more questions]</li>
-      <p>[Write your answer here, and copy this for more answers]</p>
+      <li>Can Part 1 be solved with a single "for" loop?
+        <p>Yes — use two index variables in the for header (for example: for (let i=1, j=10; ...)) and build both lines at once.</p>
+      </li>
+      <li>Can we create an "infinite" loop inside the while condition?
+        <p>No — the while condition must be boolean. Use while(true) or a function that always returns true and break from the loop when done.</p>
+      </li>
+      <li>How fast or slow is the guessing loop and what happens while it runs?
+        <p>Expected attempts for random guessing ≈ N for range size N. Small N is fast; large N can be slow. A synchronous loop blocks the JS main thread (UI freezes) unless you use Web Workers or async techniques.</p>
+      </li>
+      <li>How do rows and columns relate in nested for loops? Can we change the order?
+        <p>Typically outer loop = rows, inner = columns, producing row-by-row output. Swapping them changes traversal (column-first) and the output order; both are valid depending on desired layout.</p>
+      </li>
     </ol>
     <script type="module" src="./task_3-2.mjs" defer></script>
   </body>
