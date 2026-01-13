@@ -1,6 +1,9 @@
 "use strict";
 // Import necessary modules
 import { TSpriteCanvas } from "libSprite";
+import { TBackground } from "./background.js";
+import { THero } from "./Hero.js";
+import { TObstacle } from "./obstacle.js";
 
 //--------------- Objects and Variables ----------------------------------//
 const chkMuteSound = document.getElementById("chkMuteSound");
@@ -27,9 +30,45 @@ const SpriteInfoList = {
 };
 
 const EGameStatus = { idle: 0 };
+const background = new TBackground(spcvs, SpriteInfoList);
+const hero = new THero(spcvs, SpriteInfoList.hero3);
+const obstacles = [];
 
 
 //--------------- Functions ----------------------------------------------//
+function spawnObstacle(){
+  const obstacle = new TObstacle(spcvs, SpriteInfoList.obstacle);
+  obstacles.push(obstacle);
+  const nextTime = Math.ceil(Math.random() * 3) + 1;
+  setTimeout(spawnObstacle, nextTime * 1000);
+}
+
+function animateGame(){
+  hero.animate();
+  background.animate();
+  let deleteObstacle = false;
+  for(let i = 0; i < obstacles.length; i++){ //Goes through all obstacles in the list
+    const obstacle = obstacles[i];
+    obstacle.animate();
+    if(obstacle.x < -50){
+      deleteObstacle = true;
+    }
+  }
+  if(deleteObstacle){
+    obstacles.splice(0, 1); //Removes the first obstacle in the list
+  }
+}
+
+function drawGame() {
+ background.drawBackGround();
+ hero.draw();
+  for(let i = 0; i < obstacles.length; i++){
+    const obstacle = obstacles[i];
+    obstacle.draw();
+  }
+ background.drawGround();
+}
+
 
 function loadGame() {
   console.log("Game Loaded");
@@ -38,14 +77,18 @@ function loadGame() {
   cvs.height = SpriteInfoList.background.height; 
 
   // Overload the spcvs draw function here!
-
+  spcvs.onDraw = drawGame;
+  //start animate engine
+  setInterval(animateGame, 10);
+  setTimeout(spawnObstacle, 1000);
 } // end of loadGame
 
 
 function onKeyDown(aEvent) {
   switch (aEvent.code) {
-    case "Space":
+    case "Space" || "ArrowUp":
       console.log("Space key pressed, flap the hero!");
+      hero.flap();
       break;
   }
 } // end of onKeyDown
