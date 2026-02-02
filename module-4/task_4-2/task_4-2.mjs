@@ -62,12 +62,39 @@ printOut(newLine);
 
 printOut("--- Part 5 ----------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
+const boys = ["Jakob", "Lucas", "Emil", "Oskar", "Oliver", "William", "Filip", "Noah",
+"Elias", "Isak", "Henrik", "Aksel", "Kasper", "Mathias", "Jonas", "Tobias", "Liam", "Håkon", "Theodor",
+"Magnus"];
+
+const allNames = girls.concat(boys);
+printOut(allNames.join(", "));
+
 printOut(newLine);
 
 printOut("--- Part 6 ----------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
+class TBook {
+    constructor(aTitle, aAuthor, aYearPublished) {
+        this.title = aTitle;
+        this.author = aAuthor;
+        this.yearPublished = aYearPublished;
+    }
+    toString() {
+        return `${this.title}, by ${this.author} (${this.yearPublished})`;
+    }
+}
+
+const bookList = [
+    new TBook("To Kill a Mockingbird", "Harper Lee", 1960),
+    new TBook("1984", "George Orwell", 1949),
+    new TBook("The Great Gatsby", "F. Scott Fitzgerald", 1925),
+    new TBook("The Catcher in the Rye", "J.D. Salinger", 1951),
+    new TBook("Moby Dick", "Herman Melville", 1851)
+];
+for (let book of bookList) {
+    printOut(book.toString());
+}
+
 printOut(newLine);
 
 printOut("--- Part 7 ----------------------------------------------------------------------------------------------");

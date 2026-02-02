@@ -46,13 +46,50 @@ const MovieGenre = [
 ];
 
 //--- Part 1 ----------------------------------------------------------------------------------------------
-/* Put your code below here!*/
+function calculateOnClick() {
+  const textOutput1 = document.getElementById("txtTask1Output");
+  const txtRectHeight = document.getElementById("txtRectHeight");
+  const txtRectWidth = document.getElementById("txtRectWidth");
+  const width = parseInt(txtRectWidth.value);
+  const height = parseInt(txtRectHeight.value);
+  const area = width * height;
+  const perimeter = 2 * (width + height);
+  textOutput1.innerHTML = `width: ${width}, height: ${height}`;
+  textOutput1.innerHTML += `<br/>Circumference = ${perimeter}, Area = ${area}`;
+}
+
+let cmbTask1Calculate = document.getElementById("cmbTask1Calculate");
+cmbTask1Calculate.onclick = calculateOnClick;
 
 //--- Part 2 ----------------------------------------------------------------------------------------------
-/* Put your code below here!*/
+function textCountEnter(aEvent) {
+  const textOutput2 = document.getElementById("txtTask2Output");
+  if (aEvent.key === "Enter") {
+    const word = txtTask2Word.value;
+    task2Words.push(word);
+    textOutput2.innerHTML = `You have entered ${task2Words.length} words: <br/>`;
+    textOutput2.innerHTML += task2Words.join(", ");
+    txtTask2Word.value = "";
+  }
+}
+
+const txtTask2Word = document.getElementById("txtTask2Word");
+txtTask2Word.addEventListener("keypress", textCountEnter);
+const task2Words = [];
 
 //--- Part 3 ----------------------------------------------------------------------------------------------
-/* Put your code below here!*/
+const chkTask3 = document.getElementsByName("chkTask3");
+const checkAnswer = document.getElementById("cmbTask3CheckAnswer");
+const tekstOutPut3 = document.getElementById("txtTask3Output");
+function cmbTask3CheckAnswerClick() {
+  tekstOutPut3.innerHTML = "";
+  for (let i = 0; i < chkTask3.length; i++) {
+    const chkBox = chkTask3[i];
+    const text = `chkTask3[${i}].checked =  ${chkBox.checked}`;
+    tekstOutPut3.innerHTML += text + "<br/>";
+  }
+}
+checkAnswer.addEventListener("click", cmbTask3CheckAnswerClick);
 
 //--- Part 4 ----------------------------------------------------------------------------------------------
 /* Put your code below here!*/
