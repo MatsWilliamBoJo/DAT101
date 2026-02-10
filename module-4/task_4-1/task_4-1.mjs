@@ -1,280 +1,350 @@
 "use strict";
 import { printOut, newLine } from "../../common/script/utils.mjs";
 
-// Part 1: Account Types (5 points)
 printOut("--- Part 1 ----------------------------------------------------------------------------------------------");
-
+/* Put your code below here!*/
 const AccountType = {
     Normal: "Brukskonto",
     Saving: "Sparekonto",
     Credit: "Kreditkonto",
     Pension: "Pensionskonto"
 };
-printOut(Object.values(AccountType).join(", "));
-printOut(newLine);
 
-// Singleton class for the shared account instance
-class TAccountSingleton {
-    constructor(type = AccountType.Normal) {
-        if (!TAccountSingleton.instance) {
-            TAccountSingleton.instance = new TAccount(type); // Create a single shared account instance
-        }
-        return TAccountSingleton.instance;
-    }
-}
 
-// Part 2: Basic Bank Account (15 points)
+const allTypes = Object.values(AccountType).join(", ");
+printOut(allTypes);
+
 printOut("--- Part 2 ----------------------------------------------------------------------------------------------");
-
+/* Put your code below here!*/
 class TAccount {
-    constructor(type) {
-        this._type = type;
+    #type; 
+
+    constructor(aType) {
+        this.#type = aType;
     }
 
-    toString() {
-        return this._type;
-    }
-
+    
     setType(newType) {
-        printOut("Account is changed from " + this._type + " to " + newType);
-        this._type = newType;
+        printOut(`Account is changed from ${this.#type} to ${newType}`);
+        this.#type = newType;
+    }
+
+    
+    toString() {
+        return this.#type;
     }
 }
 
-// Using the singleton pattern to create and share `myAccount` instance
-let myAccount = new TAccountSingleton(AccountType.Normal);
-printOut("myAccount = " + myAccount.toString());
 
-// Change the account type to "Sparekonto"
-myAccount.setType(AccountType.Saving);
-printOut("myAccount = " + myAccount.toString());
-printOut(newLine);
+const myAccount = new TAccount("Normal");
 
-// Part 3: Extended Account with Balance
+
+printOut(`myAccount = ${myAccount.toString()}`);
+
+
+myAccount.setType("Saving");
+
+
+printOut(`myAccount = ${myAccount.toString()}`);
+
 printOut("--- Part 3 ----------------------------------------------------------------------------------------------");
+/* Put your code below here!*/
+class BankAccount {
+    #type;
+    #balance;
 
-class TAccount2 extends TAccount {
-    constructor(type) {
-        super(type);
-        this._balance = 0;
+    constructor(aType, initialBalance = 0) {
+        this.#type = aType;
+        this.#balance = initialBalance;
+    }
+
+
+    setType(aType) {
+        printOut(`Account type changed from ${this.#type} to ${aType}`);
+        this.#type = aType;
+    }
+
+    
+    toString() {
+        return `Type: ${this.#type}, Balance: ${this.#balance.toFixed(2)} NOK`;
     }
 
     getBalance() {
-        return this._balance;
+        return this.#balance;
     }
 
-    deposit(amount) {
-        this._balance += amount;
-        printOut("Deposited " + amount + ", new balance is " + this._balance);
+  
+    deposit(aAmount) {
+        if (aAmount > 0) {
+            this.#balance += aAmount;
+            printOut(`Deposit of ${aAmount.toFixed(2)}, new balance is ${this.#balance.toFixed(2)}`);
+        } else {
+            printOut("Deposit amount must be positive");
+        }
     }
 
-    withdraw(amount) {
-        this._balance -= amount;
-        printOut("Withdrew " + amount + ", new balance is " + this._balance);
-    }
-}
-
-// Extend the singleton to use the TAccount2 features for balance and transactions
-TAccountSingleton.instance = new TAccount2(myAccount._type);
-myAccount = TAccountSingleton.instance; // Re-assign `myAccount` to point to the updated singleton
-
-myAccount.deposit(100);
-myAccount.withdraw(25);
-printOut("My account balance is " + myAccount.getBalance());
-printOut(newLine);
-
-// Part 4: Adding Withdrawal Limits by Account Type
-printOut("--- Part 4 ----------------------------------------------------------------------------------------------");
-
-class TAccount3 extends TAccount2 {
-    constructor(type) {
-        super(type);
-        this._withdrawCount = 0;
-    }
-
-    withdraw(amount) {
-        switch (this._type) {
-            case AccountType.Saving:
-                if (this._withdrawCount >= 3) {
-                    printOut("You can't withdraw from a Sparekonto more than three times!");
-                } else {
-                    this._balance -= amount;
-                    this._withdrawCount++;
-                    printOut("Withdrawal of " + amount + ", new balance is " + this._balance);
-                }
-                break;
-            case AccountType.Pension:
-                printOut("You can't withdraw from a Pensionskonto!");
-                break;
-            default:
-                this._balance -= amount;
-                printOut("Withdrawal of " + amount + ", new balance is " + this._balance);
+ 
+    withdraw(aAmount) {
+        if (aAmount <= 0) {
+            printOut("Withdrawal amount must be positive");
+        } else if (aAmount > this.#balance) {
+            printOut("Insufficient funds for withdrawal");
+        } else {
+            this.#balance -= aAmount;
+            printOut(`Withdrawal of ${aAmount.toFixed(2)}, new balance is ${this.#balance.toFixed(2)}`);
         }
     }
 }
 
-// Update the singleton to use the features in TAccount3
-TAccountSingleton.instance = new TAccount3(myAccount._type);
-myAccount = TAccountSingleton.instance; // Update `myAccount` to the latest instance
 
-myAccount.deposit(25);
-myAccount.withdraw(30);
-myAccount.withdraw(30);
-myAccount.withdraw(30);
-myAccount.withdraw(30);
+const myAccount2 = new BankAccount("Normal");
+myAccount2.deposit(100);
+myAccount2.withdraw(25);
+printOut(`My account balance is ${myAccount2.getBalance().toFixed(2)}`);
 
-myAccount.setType(AccountType.Pension);
-myAccount.withdraw(10);
+printOut("--- Part 4 ----------------------------------------------------------------------------------------------");
+/* Put your code below here!*/
+class TAccountLimited {
+    #type;
+    #balance;
+    #withdrawCount;
 
-myAccount.setType(AccountType.Saving);
-myAccount.withdraw(10);
-printOut(newLine);
-
-// Part 5: Additional Account Functionality with Enhanced Tracking
-printOut("--- Part 5 ----------------------------------------------------------------------------------------------");
-
-class TAccount5 extends TAccount3 {
-    setType(newType) {
-        super.setType(newType);
-        this._withdrawCount = 0; // Reset the withdrawal count when account type is changed
-    }
-}
-
-// Use the TAccount5 class for the final part
-TAccountSingleton.instance = new TAccount5(myAccount._type);
-myAccount = TAccountSingleton.instance; // Update `myAccount` reference
-
-myAccount.deposit(150);
-printOut("Deposit of 150kr, new balance is " + myAccount.getBalance() + "kr");
-printOut(myAccount.toString());
-printOut(newLine);
-
-// Part 6: Currency Conversion and Handling Balances in Different Currencies
-printOut("--- Part 6 ----------------------------------------------------------------------------------------------");
-
-const CurrencyTypes = {
-  NOK: { value: 1.0000, name: "Norske kroner", denomination: "kr" },
-  EUR: { value: 0.0985, name: "Europeiske euro", denomination: "€" },
-  USD: { value: 0.1091, name: "United States dollar", denomination: "$" },
-  GBP: { value: 0.0847, name: "Pound sterling", denomination: "£" },
-  INR: { value: 7.8309, name: "Indiske rupee", denomination: "₹" },
-  AUD: { value: 0.1581, name: "Australske dollar", denomination: "A$" },
-  PHP: { value: 6.5189, name: "Filippinske peso", denomination: "₱" },
-  SEK: { value: 1.0580, name: "Svenske kroner", denomination: "kr" },
-  CAD: { value: 0.1435, name: "Canadiske dollar", denomination: "C$" },
-  THB: { value: 3.3289, name: "Thai baht", denomination: "฿" }
-};
-
-// Function to convert between currencies
-function currencyConvert(fromCurrency, toCurrency) {
-    return fromCurrency.value / toCurrency.value;
-}
-
-class TAccount6 {
-    constructor() {
-        this.privateType = "NOK";
-        this.privateBalance = 150; // Starting balance in NOK
-        this.privateWithdrawCount = 0;
-        this.privateCurrencyType = CurrencyTypes.NOK;
+    constructor(aType, initialBalance = 0) {
+        this.#type = aType;
+        this.#balance = initialBalance;
+        this.#withdrawCount = 0;
     }
 
-    toString() {
-        return `Private type: ${this.privateType} Private balance: ${this.privateBalance.toFixed(2)} Private withdrawCount: ${this.privateWithdrawCount} Private currencyType: ${this.privateCurrencyType.name}`;
-    }
-
-    setCurrencyType(aType) {
-        printOut(`The account currency has changed from ${this.privateCurrencyType.name} to ${aType.name}`);
-        
-        // Adjust the balance according to the conversion rate
-        const conversionRate = currencyConvert(this.privateCurrencyType, aType);
-        this.privateBalance *= conversionRate;
-
-        // Update currency type and type name
-        this.privateCurrencyType = aType;
-        this.privateType = aType.name;
-        
-        // Print new balance with proper formatting
-        printOut(`New balance is ${this.privateBalance.toFixed(2)}${aType.denomination}`);
+    setType(aType) {
+        printOut(`Account is changed from ${this.#type} to ${aType}`);
+        this.#type = aType;
+        this.#withdrawCount = 0;
     }
 
     deposit(aAmount) {
-        const conversionRate = currencyConvert(this.privateCurrencyType, CurrencyTypes.NOK);
-        this.privateBalance += aAmount * conversionRate; // Adjust deposit based on currency conversion
-        printOut(`Deposited ${aAmount.toFixed(2)}${this.privateCurrencyType.denomination}, new balance is ${this.privateBalance.toFixed(2)}${this.privateCurrencyType.denomination}`);
+        if (aAmount > 0) {
+            this.#balance += aAmount;
+            this.#withdrawCount = 0;
+            printOut(`Deposit of ${aAmount}, new balance is ${this.#balance}`);
+        } else {
+            printOut("Deposit amount must be positive");
+        }
     }
 
     withdraw(aAmount) {
-        const conversionRate = currencyConvert(this.privateCurrencyType, CurrencyTypes.NOK);
-        this.privateBalance -= aAmount * conversionRate; // Adjust withdrawal based on currency conversion
-        this.privateWithdrawCount++;
-        printOut(`Withdrew ${aAmount.toFixed(2)}${this.privateCurrencyType.denomination}, new balance is ${this.privateBalance.toFixed(2)}${this.privateCurrencyType.denomination}`);
-    }
-}
+        switch (this.#type) {
+            case "Pensionskonto":
+                printOut("You can't withdraw from a Pensionskonto!");
+                return;
+            case "Sparekonto":
+                if (this.#withdrawCount >= 3) {
+                    printOut("You can't Withdraw from a Sparekonto more than three times!");
+                    return;
+                }
+                break;
+        }
 
-// Create a new TAccount instance and change currency
-const account = new TAccount6();
-
-// Change currency from Norwegian Krone to Swedish Krone
-account.setCurrencyType(CurrencyTypes.SEK);
-
-// Change currency from Swedish Krone to United States Dollar
-account.setCurrencyType(CurrencyTypes.USD);
-
-// Change currency from United States Dollar to Norwegian Krone
-account.setCurrencyType(CurrencyTypes.NOK);
-
-printOut(newLine);
-
-printOut("--- Part 7 ----------------------------------------------------------------------------------------------");
-
-function currencyConvert2(fromCurrency, toCurrency) {
-    return fromCurrency.value / toCurrency.value;
-}
-
-class TAccount7 {
-    constructor() {
-        this.privateType = "NOK";
-        this.privateBalance = 0;
-        this.privateWithdrawCount = 0;
-        this.privateCurrencyType = CurrencyTypes.NOK;
-    }
-
-    toString() {
-        return `Private type: ${this.privateType} Private balance: ${this.privateBalance.toFixed(2)} Private withdrawCount: ${this.privateWithdrawCount} Private currencyType: ${this.privateCurrencyType.name}`;
-    }
-
-    setCurrencyType2(aType) {
-        printOut(`The account currency has changed from ${this.privateCurrencyType.name} to ${aType.name}`);
-        this.privateBalance *= currencyConvert2(this.privateCurrencyType, aType);
-        this.privateCurrencyType = aType;
-        printOut(`New balance is ${this.privateBalance.toFixed(2)}${this.privateCurrencyType.denomination}`);
-    }
-
-    deposit(aAmount, aType = CurrencyTypes.NOK) {
-        const convertedAmount = aAmount * currencyConvert2(aType, this.privateCurrencyType);
-        this.privateBalance += convertedAmount;
-        printOut(`Deposit of ${aAmount.toFixed(2)} ${aType.name}, new balance is ${this.privateBalance.toFixed(2)}${this.privateCurrencyType.denomination}`);
-    }
-
-    withdraw(aAmount, aType = CurrencyTypes.NOK) {
-        const convertedAmount = aAmount * currencyConvert2(aType, this.privateCurrencyType);
-        if (this.privateBalance >= convertedAmount) {
-            this.privateBalance -= convertedAmount;
-            printOut(`Withdrawal of ${aAmount.toFixed(2)} ${aType.name}, new balance is ${this.privateBalance.toFixed(2)}${this.privateCurrencyType.denomination}`);
+        if (aAmount <= 0) {
+            printOut("Withdrawal amount must be positive");
+        } else if (aAmount > this.#balance) {
+            printOut("Insufficient funds for withdrawal");
         } else {
-            printOut("Insufficient funds for withdrawal.");
+            this.#balance -= aAmount;
+            this.#withdrawCount++;
+            printOut(`Withdrawal of ${aAmount}, new balance is ${this.#balance}`);
+        }
+    }
+
+    getBalance() {
+        return this.#balance;
+    }
+}
+
+
+const myAccount4 = new TAccountLimited("Normal");
+myAccount4.deposit(25);              
+myAccount4.deposit(75);              
+myAccount4.setType("Sparekonto");    
+
+myAccount4.withdraw(30);             
+myAccount4.withdraw(30);             
+myAccount4.withdraw(30);             
+myAccount4.withdraw(30);            
+myAccount4.setType("Pensionskonto"); 
+myAccount4.withdraw(10);             
+
+myAccount4.setType("Sparekonto");    
+myAccount4.withdraw(10);             
+
+printOut("--- Part 5 ----------------------------------------------------------------------------------------------");
+/* Put your code below here!*/
+// Use the imported printOut; do not redefine it here.
+
+class TAccountWithCurrency {
+    #type;
+    #balance;
+    #withdrawCount;
+    #currencyType;
+
+    constructor(aType, initialBalance = 0) {
+        this.#type = aType;
+        this.#balance = initialBalance;
+        this.#withdrawCount = 0;
+        this.#currencyType = "NOK";
+    }
+
+    deposit(aAmount) {
+        if (aAmount > 0) {
+            this.#balance += aAmount;
+            this.#withdrawCount = 0;
+            printOut(`Deposit of ${aAmount}${this.#currencyType}; new balance is ${this.#balance}${this.#currencyType}`);
+        } else {
+            printOut("Deposit amount must be positive");
         }
     }
 }
 
-// Create a new instance for Task 7 demonstration
-const myAccount2 = new TAccount7();
 
-// Task 7 operations
-myAccount2.deposit(12, CurrencyTypes.USD);
-myAccount2.withdraw(10, CurrencyTypes.GBP);
-myAccount2.setCurrencyType2(CurrencyTypes.CAD);
-myAccount2.setCurrencyType2(CurrencyTypes.INR);
-myAccount2.withdraw(150.11, CurrencyTypes.SEK);
+const myAccountCurrency = new TAccountWithCurrency("Normal");
+myAccountCurrency.deposit(150);
 
-printOut(newLine);
+printOut("--- Part 6 ----------------------------------------------------------------------------------------------");
+/* Put your code below here!*/
+const CurrencyTypes = {
+    NOK: { value: 1.0000, name: "Norske kroner", denomination: "kr" },
+    SEK: { value: 1.0580, name: "Svenske kroner", denomination: "kr" },
+    USD: { value: 0.1091, name: "United States dollar", denomination: "$" }
+};
+
+
+
+class TAccountCurrency {
+    #type;
+    #balance;
+    #withdrawCount;
+    #currencyType;
+
+    constructor(aType, initialBalance = 0) {
+        this.#type = aType;
+        this.#balance = initialBalance;
+        this.#withdrawCount = 0;
+        this.#currencyType = "NOK";
+    }
+
+    #currencyConvert(newCurrencyType) {
+        const currentRate = CurrencyTypes[this.#currencyType].value;
+        const newRate = CurrencyTypes[newCurrencyType].value;
+        return (this.#balance * newRate) / currentRate;
+    }
+
+    setCurrencyType(newCurrencyType) {
+        if (newCurrencyType === this.#currencyType) return;
+
+        const oldCurrency = this.#currencyType;
+        this.#balance = this.#currencyConvert(newCurrencyType);
+        this.#currencyType = newCurrencyType;
+
+        const symbol = CurrencyTypes[newCurrencyType].denomination;
+        printOut(`The account currency has changed from ${CurrencyTypes[oldCurrency].name} to ${CurrencyTypes[newCurrencyType].name}`);
+        printOut(`New balance is ${this.#balance.toFixed(2)}${symbol}`);
+    }
+
+    deposit(aAmount) {
+        if (aAmount > 0) {
+            this.#balance += aAmount;
+            this.#withdrawCount = 0;
+        }
+    }
+}
+const myAccountCurrency2 = new TAccountCurrency("Normal");
+myAccountCurrency2.deposit(1000);
+myAccountCurrency2.setCurrencyType("USD");
+myAccountCurrency2.setCurrencyType("SEK");
+myAccountCurrency2.setCurrencyType("NOK");
+
+printOut("--- Part 7 ----------------------------------------------------------------------------------------------");
+/* Put your code below here!*/
+// Merge additional currencies into the already defined CurrencyTypes (do not redeclare CurrencyTypes)
+const CurrencyTypesExtended = {
+    ...CurrencyTypes,
+    GBP: { value: 0.0847, name: "Pound sterling", denomination: "£" },
+    CAD: { value: 0.1435, name: "Canadiske dollar", denomination: "C$" },
+    INR: { value: 7.8309, name: "Indiske rupee", denomination: "₹" }
+};
+
+class TAccountFull {
+    #type;
+    #balance;
+    #withdrawCount;
+    #currencyType;
+
+    constructor(aType, initialBalance = 0) {
+        this.#type = aType;
+        this.#balance = initialBalance;
+        this.#withdrawCount = 0;
+        this.#currencyType = "NOK";
+    }
+
+    #currencyConvert(newCurrencyType) {
+        const currentRate = CurrencyTypesExtended[this.#currencyType].value;
+        const newRate = CurrencyTypesExtended[newCurrencyType].value;
+        return (this.#balance * newRate) / currentRate;
+    }
+
+    setCurrencyType(newCurrencyType) {
+        if (newCurrencyType === this.#currencyType) return;
+
+        const oldCurrency = this.#currencyType;
+        this.#balance = this.#currencyConvert(newCurrencyType);
+        this.#currencyType = newCurrencyType;
+
+        const symbol = CurrencyTypesExtended[newCurrencyType].denomination;
+        printOut(`The account currency has changed from ${CurrencyTypesExtended[oldCurrency].name} to ${CurrencyTypesExtended[newCurrencyType].name}`);
+        printOut(`New balance is ${this.#balance.toFixed(2)}${symbol}`);
+    }
+
+    deposit(aAmount, aType = "NOK") {
+        if (aAmount > 0) {
+            const depositCurrency = CurrencyTypesExtended[aType] ? aType : "NOK";
+            const convertedAmount = (aAmount * CurrencyTypesExtended[this.#currencyType].value) / CurrencyTypesExtended[depositCurrency].value;
+            this.#balance += convertedAmount;
+            this.#withdrawCount = 0;
+
+            const accountSymbol = CurrencyTypesExtended[this.#currencyType].denomination;
+            printOut(`Deposit of ${aAmount.toFixed(2)} ${CurrencyTypesExtended[depositCurrency].name}, new balance is ${this.#balance.toFixed(2)}${accountSymbol}`);
+        }
+    }
+
+    withdraw(aAmount, aType = "NOK") {
+        const withdrawCurrency = CurrencyTypesExtended[aType] ? aType : "NOK";
+        const convertedAmount = (aAmount * CurrencyTypesExtended[this.#currencyType].value) / CurrencyTypesExtended[withdrawCurrency].value;
+
+        if (convertedAmount > this.#balance) {
+            printOut("Insufficient funds for withdrawal");
+            return;
+        }
+
+        this.#balance -= convertedAmount;
+
+        const accountSymbol = CurrencyTypesExtended[this.#currencyType].denomination;
+        printOut(`Withdrawal of ${aAmount.toFixed(2)} ${CurrencyTypesExtended[withdrawCurrency].name}, new balance is ${this.#balance.toFixed(2)}${accountSymbol}`);
+    }
+
+    getBalance() {
+        return this.#balance.toFixed(2);
+    }
+
+    // Public getter for the private currency field so external code cannot access #currencyType directly
+    getCurrencyType() {
+        return this.#currencyType;
+    }
+}
+
+const myAccountFull = new TAccountFull("Normal");
+myAccountFull.deposit(1000, "NOK");
+myAccountFull.setCurrencyType("USD");
+myAccountFull.deposit(100, "EUR"); // EUR not defined, should default to NOK
+myAccountFull.deposit(100, "GBP");
+myAccountFull.withdraw(50, "CAD");
+myAccountFull.setCurrencyType("INR");
+printOut(`Final balance is ${myAccountFull.getBalance()} ${CurrencyTypesExtended[myAccountFull.getCurrencyType()].denomination}`);

@@ -99,21 +99,112 @@ printOut(newLine);
 
 printOut("--- Part 7 ----------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
-printOut(newLine);
+// Static object with weekday values and names
+// Static object with weekday values and names
+const EWeekDays = {
+    WeekDay1: { value: 0x01, name: "Monday" },
+    WeekDay2: { value: 0x02, name: "Tuesday" },
+    WeekDay3: { value: 0x04, name: "Wednesday" },
+    WeekDay4: { value: 0x08, name: "Thursday" },
+    WeekDay5: { value: 0x10, name: "Friday" },
+    WeekDay6: { value: 0x20, name: "Saturday" },
+    WeekDay7: { value: 0x40, name: "Sunday" },
+    Workdays: { value: 0x01 + 0x02 + 0x04 + 0x08 + 0x10, name: "Workdays" },
+    Weekends: { value: 0x20 + 0x40, name: "Weekend" }
+};
 
+// Get all keys from the EWeekDays object
+const keys = Object.keys(EWeekDays);
+
+// Loop through the keys and print each entry
+for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const entry = EWeekDays[key];
+    printOut(`${key} → Value: ${entry.value}, Name: ${entry.name}`);
+}
 printOut("--- Part 8 ----------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
+const randNums = [];
+for (let i = 0; i < 35; i++) {
+  randNums.push(Math.floor(Math.random() * 20) + 1);
+}
+printOut("Original (35): " + randNums.join(", "));
+
+
+const asc = randNums.slice().sort((a, b) => a - b);
+printOut("Ascending: " + asc.join(", "));
+
+
+const desc = randNums.slice().sort((a, b) => b - a);
+printOut("Descending: " + desc.join(", "));
+
 printOut(newLine);
 
 printOut("--- Part 9 ----------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
-printOut(newLine);
 
-/* Task 10*/
+const randomArray = Array.from({ length: 35 }, () => Math.floor(Math.random() * 20) + 1);
+
+const ascending = [...randomArray].sort((a, b) => a - b);
+printOut("Ascending: " + ascending.join(", "));
+
+const descending = [...randomArray].sort((a, b) => b - a);
+printOut("Descending: " + descending.join(", "));
+
+const frequencyMap = {};
+for (let num of randomArray) {
+    frequencyMap[num] = (frequencyMap[num] || 0) + 1;
+}
+
+printOut("Number → Frequency:");
+Object.keys(frequencyMap)
+    .sort((a, b) => a - b)
+    .forEach(num => {
+        printOut(`${num} → ${frequencyMap[num]}`);
+    });
+
+const frequencyGroups = {};
+
+for (let num in frequencyMap) {
+    const freq = frequencyMap[num];
+    if (!frequencyGroups[freq]) frequencyGroups[freq] = [];
+    frequencyGroups[freq].push(Number(num));
+}
+
+const sortedFrequencies = Object.keys(frequencyGroups)
+    .map(Number)
+    .sort((a, b) => b - a);
+
+printOut("Frequency → Numbers:");
+for (let freq of sortedFrequencies) {
+    const nums = frequencyGroups[freq].sort((a, b) => a - b);
+    printOut(`${freq} → ${nums.join(", ")}`);
+}
+
 printOut("--- Part 10 ---------------------------------------------------------------------------------------------");
 /* Put your code below here!*/
-printOut("Replace this with you answer!");
-printOut(newLine);
+
+let array2D = [];
+
+for (let row = 0; row < 5; row++) {
+    array2D[row] = []; 
+    for (let col = 0; col < 9; col++) {
+        array2D[row][col] = `Row ${row + 1}, Column ${col + 1}`;
+    }
+}
+
+printOut("Printing array row by row:");
+for (let row = 0; row < array2D.length; row++) {
+    let rowText = "";
+    for (let col = 0; col < array2D[row].length; col++) {
+        rowText += array2D[row][col] + " | ";
+    }
+    printOut(rowText);
+}
+
+printOut("\nPrinting each cell individually:");
+for (let row = 0; row < array2D.length; row++) {
+    for (let col = 0; col < array2D[row].length; col++) {
+        printOut(array2D[row][col]);
+    }
+}
