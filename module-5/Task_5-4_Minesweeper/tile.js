@@ -1,11 +1,34 @@
 "use strict";
 import { TSpriteButton } from "libSprite";
 import { TPoint } from "lib2d";
-import { gameLevel } from "./Minesweeper.mjs";
+import { gameLevel, gameInfo } from "./Minesweeper.mjs";
 
 const MineInfoColors = ["blue", "green", "red", "darkblue", "brown", "cyan", "black", "grey"];
 let tiles = [];
-let ctx = document.getElementById("cvs").getContext("2d");
+const ctx = document.getElementById("cvs").getContext("2d");
+let gameOver = false;
+let tilesRemaining = 0;
+
+function setGameOver() {
+  gameOver = true;
+  gameInfo.setSmileyIndex(2);
+  gameInfo.stopTimer();
+  for (let colIndex = 0; colIndex < gameLevel.Tiles.Col; colIndex++) {
+    const cols = tiles[colIndex];
+    for (let rowIndex = 0; rowIndex < gameLevel.Tiles.Row; rowIndex++) {
+      const tile = cols[rowIndex];
+      if (tile.isMine) {
+        if (tile.index === 3) {
+          tile.index = 7;
+        } else {
+          tile.index = 5;
+        }
+      } else if (tile.index === 3) {
+        tile.index = 6;
+      }
+    }
+  }
+}
 
 export class TTile extends TSpriteButton {
   #mine;
@@ -22,7 +45,6 @@ export class TTile extends TSpriteButton {
     this.#row = aRow;
     this.#neighbors = null;
     this.mineInfo = 0;
-    
   }
 
   get isMine() {
@@ -35,9 +57,9 @@ export class TTile extends TSpriteButton {
     this.#getNeighbors();
     for (let i = 0; i < this.#neighbors.length; i++) {
       const tile = this.#neighbors[i];
-        if (tile.isMine === false) {
-            tile.mineInfo++;
-        }
+      if (tile.isMine === false) {
+        tile.mineInfo++;
+      }
     }
   }
 
@@ -53,82 +75,126 @@ export class TTile extends TSpriteButton {
       ctx.fillText(this.mineInfo, this.x + 13, this.y + 41);
     }
   }
+
   #getNeighbors() {
     if (this.#neighbors !== null) {
-      return this.#neighbors;
+      return;
     }
     let colFrom = this.#col - 1;
     let colTo = this.#col + 1;
     let rowFrom = this.#row - 1;
     let rowTo = this.#row + 1;
     if (colFrom < 0) {
-        colFrom = 0;
+      colFrom = 0;
     }
     if (rowFrom < 0) {
-        rowFrom = 0;
+      rowFrom = 0;
     }
     if (colTo >= gameLevel.Tiles.Col) {
-        colTo = gameLevel.Tiles.Col - 1;
+      colTo = gameLevel.Tiles.Col - 1;
     }
     if (rowTo >= gameLevel.Tiles.Row) {
-        rowTo = gameLevel.Tiles.Row - 1;
+      rowTo = gameLevel.Tiles.Row - 1;
     }
-    const neighbors = [];
+    this.#neighbors = [];
     for (let colIndex = colFrom; colIndex <= colTo; colIndex++) {
-        for (let rowIndex = rowFrom; rowIndex <= rowTo; rowIndex++) {
-            const tile = tiles[colIndex][rowIndex];
-            if (this != tile) {
-                neighbors.push(tile);
-            }
+      for (let rowIndex = rowFrom; rowIndex <= rowTo; rowIndex++) {
+        const tile = tiles[colIndex][rowIndex];
+        if (this !== tile) {
+          this.#neighbors.push(tile);
         }
+      }
     }
-    this.#neighbors = neighbors;
-    return this.#neighbors;
   }
 
   // Override functions
   onMouseDown(aEvent) {
-    if (aEvent.button === 1) {
+    // Create an if test, for testing if right button is pressed
+    // if index is 3 then set it to 0 and vice versa.
+    console.log(aEvent.button);
+    if (gameOver) {
+      return;
+    }
+    if (this.open) {
+      return;
+    }
+    if (aEvent.button === 0 && this.index !== 3) {
       this.index = 1;
-    }else if (aEvent.button === 2) {
+      gameInfo.setSmileyIndex(1);
+    } else if (aEvent.button === 2) {
       this.index = 3 - this.index;
+      if (this.index === 3) {
+        if (gameInfo.flagCount > 0) {
+          gameInfo.flagCount--;
+        } else {
+          this.index = 0;
+        }
+      } else {
+        gameInfo.flagCount++;
+      }
     }
     super.onMouseDown(aEvent);
   }
 
-
   onMouseUp(aEvent) {
-    if(aEvent.button === 2 || this.index === 3) {
-        return;
+    if (gameOver) {
+      return;
     }
+    if (aEvent.button === 2 || this.index === 3) {
+      return;
+    }
+    gameInfo.setSmileyIndex(0);
     this.open = true;
     super.onMouseUp(aEvent);
   }
 
   onMouseLeave(aEvent) {
+    if (gameOver) {
+      return;
+    }
     if (this.index === 1) {
-        this.index = 0;
+      this.index = 0;
+      gameInfo.setSmileyIndex(0);
+      super.onMouseLeave(aEvent);
     }
-    super.onMouseLeave(aEvent);
   }
-  
-  set open(_aValue){
-    if(this.isMine){
-      this.index = 5;
-    }else{
-      this.index = 2;
+
+  onMouseMove(aEvent){
+    if(this.open || gameOver){
+      return;
     }
-    if (this.mineInfo === 0){
-    this.#getNeighbors();
-    for(let i = 0; i< this.#neighbors.length; i++){ 
-        const tile = this.#neighbors[i];
-        if(tile.open === false) {
-          tile.open = true;
-        }
+    super.onMouseMove(aEvent);
+  }
+
+  set open(_aValue) {
+    if (this.open || this.index === 3) {
+      return;
+    }
+
+    if (this.isMine) {
+      setGameOver();
+      this.index = 4;
+      // Game over!
+      return;
+    } else {
+      this.index = 2;
+      // Here the tile is open, test if tileRemaining is equal to mines in game!
+      // Give smiley sunglasses 😎 !
+      tilesRemaining--;
+      if(tilesRemaining <= gameLevel.Mines){
+        gameOver = true;
+        gameInfo.setSmileyIndex(4);
+        gameInfo.stopTimer();
       }
     }
-}
-
+    if (this.mineInfo === 0) {
+      this.#getNeighbors();
+      for (let i = 0; i < this.#neighbors.length; i++) {
+        const tile = this.#neighbors[i];
+          tile.open = true;
+      }
+    }
+  }
 } // End of TTile
 
 export function createMines() {
@@ -151,11 +217,15 @@ export function createTiles(aSpcvs, aSPI) {
   const glTiles = gameLevel.Tiles;
   const colCount = glTiles.Col;
   const rowCount = glTiles.Row;
+  gameOver = false;
+  tiles = [];
+  tilesRemaining = 0;
   for (let col = 0; col < colCount; col++) {
     const rows = [];
     for (let row = 0; row < rowCount; row++) {
       const newTile = new TTile(aSpcvs, aSPI, col, row);
       rows.push(newTile);
+      tilesRemaining++;
     }
     tiles.push(rows);
   }
