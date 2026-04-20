@@ -1,22 +1,20 @@
 "use strict";
-import { spcvs, SpriteInfoList } from "./Mastermind.mjs";
+import { newGame, spcvs, SpriteInfoList } from "./Mastermind.mjs";
 import { MastermindBoard } from "./MastermindBoard.mjs";
 import { TSprite, TSpriteButtonHaptic } from "libSprite";
-/*
-1. Importer MastermindBard
-2. Lag en klasse TMenu
-3. Lag bakgrunnen.
-4. Lag alle meny elementene
-5. Lag to tegne funksjoner: draw, drawBackground
-*/ 
-export class TMenu{
+import { checkAnswer } from "./checkAnswer.js";
+
+let hintRow = MastermindBoard.AnswerHint.Row1;
+
+export class TMenu {
   #background;
   #newGame;
   #checkAnswer;
   #cheat;
   #hideAnswer;
+  #hints;
 
-  constructor(){
+  constructor() {
     this.#background = new TSprite(spcvs, SpriteInfoList.Board, 0, 0);
     let x = MastermindBoard.ButtonNewGame.x;
     let y = MastermindBoard.ButtonNewGame.y;
@@ -31,15 +29,61 @@ export class TMenu{
     y = MastermindBoard.PanelHideAnswer.y;
     this.#hideAnswer = new TSprite(spcvs, SpriteInfoList.PanelHideAnswer, x, y);
 
+    this.#checkAnswer.disabled = true;
+    this.#cheat.onClick = this.#cheatOnClick.bind(this);
+    this.#newGame.onClick = this.#newGameOnClick.bind(this);
+    this.#checkAnswer.onClick = this.#checkAnswerOnClick.bind(this);
+    this.#hints = [];
   }
 
-  drawBackground(){
+  #checkAnswerOnClick() {
+    checkAnswer();
+  }
+
+  #newGameOnClick() {
+    newGame();
+  }
+
+  #cheatOnClick() {
+    this.#hideAnswer.hidden = !this.#hideAnswer.hidden;
+  }
+
+  drawBackground() {
     this.#background.draw();
   }
 
-  draw(){
+  draw() {
     this.#newGame.draw();
+    this.#checkAnswer.draw();
+    this.#cheat.draw();
+    this.#hideAnswer.draw();
+    for (let i = 0; i < this.#hints.length; i++) {
+      const hintPeg = this.#hints[i];
+      hintPeg.draw();
+    }
   }
 
-}// End of TMenu
+  SetCheckAnswerDisabled(aDisabled) {
+    this.#checkAnswer.disabled = aDisabled;
+  }
 
+  createHints(aCorrectCount, aWrongCount) {
+    // Create a black hint peg
+    // Push this to hints.
+    let hintIndex = 0;
+    for (let i = 0; i < aCorrectCount; i++) {
+      const pos = hintRow[i];
+      const blackPeg = new TSprite(spcvs, SpriteInfoList.ColorHint, pos.x, pos.y);
+      blackPeg.index = 1;
+      this.#hints.push(blackPeg);
+      hintIndex++;
+    }
+    for (let i = 0; i < aWrongCount; i++) {
+      const pos = hintRow[hintIndex];
+      const whitePeg = new TSprite(spcvs, SpriteInfoList.ColorHint, pos.x, pos.y);
+      whitePeg.index = 0;
+      this.#hints.push(whitePeg);
+      hintIndex++;
+    }
+  }
+} // End of TMenu

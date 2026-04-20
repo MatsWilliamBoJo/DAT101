@@ -1,70 +1,222 @@
 "use strict";
 import { TSprite, TSpriteButton, TSpriteNumber } from "libSprite";
-import { startGame } from "./FlappyBird.mjs";
+import { startGame, EGameStatus, hero, obstacles, baits } from "./FlappyBird.mjs";
 import { TSoundFile } from "libSound";
+import { chkMuteSound } from "./FlappyBird.mjs";
 
-const fnCountDownSound = "./Media/countdown.mp3";
-const fnBackgroundMusic = "./Media/running.mp3";
+const fnCountDown = "./Media/countDown.mp3";
+const fnRunning = "./Media/running.mp3";
 
-export class TMenu{
-    #spTitle;
-    #spPlayBtn;
-    #spCountdown;
-    #sfCountDown;
-    #sfBackgroundMusic;
-    #spGameScore;
-    constructor(aSpcvs, aSPI){
-        this.#spTitle = new TSprite(aSpcvs, aSPI.flappyBird, 200, 100);
-        this.#spPlayBtn = new TSpriteButton(aSpcvs, aSPI.buttonPlay, 235, 165);
-        this.#spPlayBtn.addEventListener("click", this.spPlayBtn.bind(this));
-        this.#spCountdown = new TSpriteNumber(aSpcvs, aSPI.numberBig, 275, 165);
-        this.#spCountdown.visible = false;
-        this.#sfCountDown = null;
-        this.#sfBackgroundMusic = null;
-        this.#spGameScore = new TSpriteNumber(aSpcvs, aSPI.numberSmall, 275, 10);
-        this.#spGameScore.alpha = 0.8;
+export class TMenu {
+  #spTitle;
+  #spReady;
+  #spPlayBtn;
+  #spCountDown;
+  #sfCountDown;
+  #sfRunning;
+  #spGameScore;
+  #spGameOver;
+  #spMedal;
+  #spFinalScore;
+  #spHighScore;
+  #highScores;
+
+  constructor(aSpcvs, aSPI) {
+    this.#spTitle = new TSprite(aSpcvs, aSPI.flappyBird, 200, 100);
+    this.#spReady = new TSprite(aSpcvs, aSPI.infoText, 200, 100);
+    this.#spReady.hidden = true;
+    this.#spPlayBtn = new TSpriteButton(aSpcvs, aSPI.buttonPlay, 240, 180);
+    this.#spPlayBtn.addEventListener("click", this.spPlayBtnClick.bind(this));
+    this.#spCountDown = new TSpriteNumber(aSpcvs, aSPI.numberBig, 280, 190);
+    this.#spCountDown.visible = false;
+    this.#sfCountDown = null;
+    this.#sfRunning = null;
+    this.#spGameScore = new TSpriteNumber(aSpcvs, aSPI.numberSmall, 10, 10);
+    this.#spGameScore.alpha = 0.5;
+    this.#spGameOver = new TSprite(aSpcvs, aSPI.gameOver, 180, 150);
+    this.#spGameOver.visible = false;
+
+    this.#spMedal = new TSprite(aSpcvs, aSPI.medal, 207, 193, 0);
+    this.#spMedal.hidden = true;
+
+    this.#spFinalScore = new TSpriteNumber(aSpcvs, aSPI.numberBig, 275, 165);
+    this.#spFinalScore.visible = false;
+    this.#spHighScore = new TSpriteNumber(aSpcvs, aSPI.numberBig, 275, 215);
+    this.#spHighScore.visible = false;
+  }
+
+  incGameScore(aScore) {
+    this.#spGameScore.value += aScore;
+  }
+
+  stopSound() {
+    if (this.#sfRunning) {
+      this.#sfRunning.stop();
     }
+  }
 
-
-    draw(){
+  draw(state) {
+    switch (state) {
+      case 0: // idle
         this.#spTitle.draw();
         this.#spPlayBtn.draw();
-        this.#spCountdown.draw();
+        break;
+      case 1: // countdown
+        this.#spReady.draw();
+        this.#spCountDown.draw();
+        break;
+      case 2: // gaming
         this.#spGameScore.draw();
+        break;
+      case 4: // gameOver
+        this.#spGameOver.draw();
+        this.#spMedal.draw();
+        this.#spFinalScore.draw();
+        this.#spHighScore.draw();
+        this.#spPlayBtn.draw();
+        break;
+    }
+  }
+  animateFinalScore(targetScore, targetHighScore) {
+    let current = 0;
+    this.#spFinalScore.value = 0;
+    this.#spHighScore.value = targetHighScore;
+
+    const timer = setInterval(() => {
+      current++;
+      this.#spFinalScore.value = current;
+
+      if (current >= targetScore) {
+        clearInterval(timer);
+      }
+    }, 60); // speed of animation
+  }
+  showScore() {
+    this.#spGameScore.visible = true;
+  }
+
+  hideScore() {
+    this.#spGameScore.visible = false;
+  }
+
+  resetScore() {
+    this.#spGameScore.value = 0;
+  }
+
+  getGameScore() {
+    return this.#spGameScore.value;
+  }
+
+  countDown() {
+    this.#spCountDown.value--;
+    if (this.#spCountDown.value > 0) {
+      setTimeout(this.countDown.bind(this), 1000);
+    } else {
+      this.#spCountDown.visible = false;
+      this.#spReady.visible = false;
+      this.#spTitle.hidden = true;
+
+      this.#spGameScore.visible = true;
+
+      this.#sfRunning = new TSoundFile(fnRunning);
+      this.#sfRunning.play();
+      startGame();
+    }
+  }
+
+  spPlayBtnClick() {
+    console.log("Click!");
+    // If coming from game over, reset everything
+    if (EGameStatus.state === EGameStatus.gameOver) {
+      // Reset Hero
+      hero.restart();
+      
+
+      // Clear Arrays 
+      obstacles.length = 0; // Clear all obstacles
+      baits.length = 0; // Clear all baits
+
+      // Reset Score
+      this.resetScore();
+
+      // Hide game over elements
+      this.#spGameOver.hidden = true;
+      this.#spMedal.hidden = true;
+      this.#spFinalScore.visible = false;
+      this.#spHighScore.visible = false;
     }
 
+    EGameStatus.state = EGameStatus.countDown;
+    // Reset play button to original position
+    this.#spPlayBtn.x = 240;
+    this.#spPlayBtn.y = 180;
+    this.#spPlayBtn.hidden = true;
 
+    this.#spTitle.hidden = true;
+    this.#spReady.hidden = false;
+    this.#spCountDown.visible = true;
+    this.#spCountDown.value = 3;
+    this.#sfCountDown = new TSoundFile(fnCountDown);
+    this.#sfCountDown.play();
+    setTimeout(this.countDown.bind(this), 1000);
+  }
+  setSoundMute(aIsMuted) {
+    if (aIsMuted === true && this.#sfRunning) {
+      this.#sfRunning.pause();
+    }
+    if (aIsMuted === false && this.#sfRunning) {
+      this.#sfRunning.play();
+    }
+  }
+  showGameOver() {
+    // Stop Audio
+    this.stopSound();
 
-    incGameScore(aScore){
-        this.#spGameScore.value += aScore;
+    this.#spReady.hidden = true;
+    this.hideScore();
+
+    // Show Billboard
+    this.#spGameOver.hidden = false;
+
+    // reposition the playbttn
+    this.#spPlayBtn.x = 240; // Change these values to position where you want
+    this.#spPlayBtn.y = 45; // Adjust Y to be below the game over board
+    this.#spPlayBtn.hidden = false;
+
+    // High Score 
+    const currentScore = this.getGameScore();
+    const storedHighScore = Number(localStorage.getItem("highScore")) || 0;
+    const newHighScore = Math.max(currentScore, storedHighScore);
+
+    // Update high score if current is higher
+    if (currentScore > storedHighScore) {
+      localStorage.setItem("highScore", currentScore);
+      this.#highScores.push(currentScore);
     }
 
-    gameScore(aScore){}
-
-    stopSound(){
-        this.#sfBackgroundMusic.stop();
+    // Medal Logic 
+    let medalIndex;
+    if (currentScore >= 30) {
+      medalIndex = 1; // Gold medal
+    } else if (currentScore >= 20) {
+      medalIndex = 2; // Silver medal
+    } else if (currentScore >= 10) {
+      medalIndex = 3; // Bronze medal
+    } else {
+      medalIndex = 0; // No medal
     }
 
-    countdown(){
-        if(this.#spCountdown.value > 1){
-            this.#spCountdown.value--;
-            setTimeout(this.countdown.bind(this), 1000);
-        } else {
-            this.#spCountdown.visible = false;
-            this.#spTitle.hidden = true;
-            startGame();
-            this.#sfBackgroundMusic = new TSoundFile(fnBackgroundMusic);
-            this.#sfBackgroundMusic.play();
-        }
-    }
+    // Set the medal sprite index and show it
+    this.#spMedal.index = medalIndex;
+    this.#spMedal.hidden = false;
 
-    spPlayBtn(){
-        console.log("Play button clicked");
-        this.#spPlayBtn.hidden = true; 
-        this.#spCountdown.visible = true;
-        this.#spCountdown.value = 3;
-        this.#sfCountDown = new TSoundFile(fnCountDownSound);
-        this.#sfCountDown.play();
-        setTimeout(this.countdown.bind(this), 1000);
-    }
+    // Display scores
+    this.#spFinalScore.visible = true;
+    this.#spHighScore.visible = true;
+
+    // Animate the final score
+    this.animateFinalScore(currentScore, newHighScore);
+
+    console.log(`Game Over! Score: ${currentScore}, High Score: ${newHighScore}, Medal: ${medalIndex}`);
+  }
 }
