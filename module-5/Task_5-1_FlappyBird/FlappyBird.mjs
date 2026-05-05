@@ -48,8 +48,8 @@ export function restartGame() {
 
 export function startGame() {
   EGameStatus.state = EGameStatus.gaming;
-  menu.resetScore(); // 👈 reset to 0
-  menu.showScore(); // 👈 show top-left score
+  menu.resetScore();
+  menu.showScore(); 
   setTimeout(spawnObstacle, 1000);
   setTimeout(spawnBait, 1000);
 }
